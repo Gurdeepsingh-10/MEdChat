@@ -6,8 +6,6 @@ from app.utils.logging import get_logger
 from app.indexing.embed import load_embedding_model
 from app.retrieval.retriever import HybridRetriever
 from app.llm.groq_client import generate_answer_groq
-from app.llm.local_fallback import load_local_model, generate_answer_local
-import os
 
 logger = get_logger("backend.main")
 app = FastAPI(title="Medical RAG Chatbot Backend")
@@ -20,12 +18,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# load retriever and model once
 embedding_model = load_embedding_model()
 retriever = HybridRetriever(top_k=3)
-
-# optional local fallback
-local_tokenizer, local_model = None, None
 
 class ChatRequest(BaseModel):
     query: str
@@ -39,23 +33,25 @@ async def chat(request: ChatRequest):
     query = request.query
     logger.info(f"User query: {query}")
 
-    results = retriever.hybrid_search(embedding_model, query)
-    context = "\n\n".join(r["text"] for r in results[:3])
-
     try:
-        answer = generate_answer_groq(context, query)
-        source = "groq"
-    except Exception as e:
-        logger.warning(f"Groq failed: {e}")
-        global local_model, local_tokenizer
-        if not local_model:
-            local_tokenizer, local_model = load_local_model()
-        answer = generate_answer_local(local_tokenizer, local_model, context, query)
-        source = "local"
+        results = retriever.hybrid_search(embedding_model, query)
+        context = "\n\n".join(r["text"] for r in results[:3])
 
-    return {
-        "answer": answer,
-        "citations": [r["source_url"] for r in results[:3]],
-        "images": [],
-        "source": source,
-    }
+        # ---- call Groq
+        try:
+            answer = generate_answer_groq(context, query)
+            source = "groq"
+        except Exception as e:
+            logger.error(f"Groq inference failed: {e}")
+            return {"error": f"Groq call failed: {e}"}
+
+        return {
+            "answer": answer,
+            "citations": [r["source_url"] for r in results[:3]],
+            "images": [],
+            "source": source,
+        }
+
+    except Exception as e:
+        logger.exception("Fatal error in /chat endpoint")
+        return {"error": str(e)}

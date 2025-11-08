@@ -1,13 +1,17 @@
+# backend/app/settings.py
 from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
+import os
+
+# Make sure .env is loaded manually (Windows safe)
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 class Settings(BaseSettings):
-    app_host: str = "127.0.0.1"
-    app_port: int = 8000
     groq_api_key: str | None = None
-    faiss_index_path: str = "../data/index/faiss.index"
-    enable_ocr: bool = False
 
     class Config:
         env_file = ".env"
+        extra = "ignore"
 
+# ✅ instantiate the settings object so main.py can import it
 settings = Settings()
