@@ -8,6 +8,11 @@ from app.retrieval.retriever import HybridRetriever
 from app.llm.groq_client import generate_answer_groq
 from time import perf_counter
 from app.utils.log_manager import log_interaction
+from app.evaluation.evaluator import evaluate_retrieval, evaluate_answer_faithfulness
+import numpy as np
+
+
+
 
 logger = get_logger("backend.main")
 app = FastAPI(title="Medical RAG Chatbot Backend")
@@ -61,3 +66,23 @@ async def chat(request: ChatRequest):
     except Exception as e:
         logger.exception("Error in /chat")
         return {"error": str(e)}
+    
+
+@app.post("/evaluate")
+async def evaluate(request: ChatRequest):
+    query = request.query
+    results = retriever.search(query)
+    context = "\n\n".join(r["text"] for r in results[:3])
+    q_emb = embedding_model.encode([query], normalize_embeddings=True)
+    doc_embs = np.array([embedding_model.encode([r["text"]], normalize_embeddings=True)[0] for r in results])
+    retrieval_score = evaluate_retrieval(q_emb, doc_embs)
+
+    answer = generate_answer_groq(context, query)
+    faith_score = evaluate_answer_faithfulness(answer, context)
+
+    return {
+        "query": query,
+        "retrieval_similarity": retrieval_score,
+        "faithfulness": faith_score,
+        "answer": answer,
+    }
