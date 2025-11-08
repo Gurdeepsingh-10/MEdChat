@@ -10,3 +10,6 @@ faiss-cpu==1.8.0
 numpy==1.26.4
 scikit-learn==1.5.2      # keyword search (TF-IDF/BM25-style)
 rank-bm25==0.2.2         # optional keyword retriever
+groq==0.5.0
+transformers==4.45.2
+torch==2.4.0
