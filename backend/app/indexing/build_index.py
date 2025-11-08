@@ -17,18 +17,37 @@ META_PATH = "../data/index/meta.pkl"
 
 def build_faiss_index(data_folder: str = "../data/raw/gale"):
     docs = ingest_folder(data_folder)
-    chunks = simple_chunk(docs, chunk_size=1000)
+    print(f"✅ Loaded {len(docs)} raw documents.")
+
+    # Filter out empty text docs
+    valid_docs = [d for d in docs if d.get("text") and d["text"].strip()]
+    print(f"✅ {len(valid_docs)} documents have non-empty text.")
+
+    if not valid_docs:
+        print("❌ No valid documents found with text. Please check PDF extraction.")
+        return
+
+    chunks = simple_chunk(valid_docs, chunk_size=1000)
+    print(f"✅ Created {len(chunks)} chunks for embedding.")
+
+    if not chunks:
+        print("❌ No chunks generated — check text extraction or chunking.")
+        return
 
     model = load_embedding_model()
     vectors = compute_embeddings(model, chunks)
 
+    if vectors.size == 0:
+        print("❌ No embeddings computed — stopping.")
+        return
+
     dim = vectors.shape[1]
-    index = faiss.IndexFlatIP(dim)   # cosine similarity (since normalized)
+    index = faiss.IndexFlatIP(dim)
     index.add(vectors)
+
     os.makedirs(os.path.dirname(INDEX_PATH), exist_ok=True)
     faiss.write_index(index, INDEX_PATH)
 
-    # store metadata (for retrieval display)
     with open(META_PATH, "wb") as f:
         pickle.dump(chunks, f)
 
