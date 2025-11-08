@@ -1,5 +1,10 @@
-from app.ingestion import ingest_folder
-docs = ingest_folder("../data/raw/gale")
-print("Documents loaded:", len(docs))
-print("Sample keys:", docs[0].keys())
-print("Excerpt:", docs[0]["text"][:300])
+import requests
+
+url = "http://127.0.0.1:8000/chat"
+payload = {"query": "What are the early signs of diabetes?"}
+headers = {"Content-Type": "application/json"}
+
+response = requests.post(url, json=payload, headers=headers)
+
+print("Status Code:", response.status_code)
+print("Raw Response Text:\n", response.text)

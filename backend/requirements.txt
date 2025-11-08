@@ -13,3 +13,6 @@ rank-bm25==0.2.2         # optional keyword retriever
 groq==0.5.0
 transformers==4.45.2
 torch==2.4.0
+protobuf==5.27.2
+sentencepiece==0.2.0
+accelerate==1.1.1
