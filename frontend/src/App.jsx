@@ -21,9 +21,12 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import Preloader from "./components/Preloader";
 import { GlobalStyles } from "@mui/material";
+
+
 
 export default function App({ toggleTheme, darkMode }) {
   const [messages, setMessages] = useState([]);
@@ -192,39 +195,43 @@ export default function App({ toggleTheme, darkMode }) {
                 pb: "2px",
               }}
             >
-              <Typography
-                variant="body1"
-                sx={{
-                  cursor: "pointer",
-                  color: darkMode ? "#bcd8ff" : "#3170f0",
-                  transition: "all 0.3s ease",
-                  fontWeight: 500,
-                  lineHeight: "1.5rem",
-                  "&:hover": {
-                    color: darkMode ? "#ffffff" : "#0059ff",
-                    transform: "translateY(-1px)",
-                  },
-                }}
-              >
-                About
-              </Typography>
+              <Link to="/about" style={{ textDecoration: "none" }}>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    cursor: "pointer",
+                    color: darkMode ? "#bcd8ff" : "#3170f0",
+                    transition: "all 0.3s ease",
+                    fontWeight: 500,
+                    lineHeight: "1.5rem",
+                    "&:hover": {
+                      color: darkMode ? "#ffffff" : "#0059ff",
+                      transform: "translateY(-1px)",
+                    },
+                  }}
+                >
+                  About
+                </Typography>
+              </Link>
 
-              <Typography
-                variant="body1"
-                sx={{
-                  cursor: "pointer",
-                  color: darkMode ? "#bcd8ff" : "#3170f0",
-                  transition: "all 0.3s ease",
-                  fontWeight: 500,
-                  lineHeight: "1.5rem",
-                  "&:hover": {
-                    color: darkMode ? "#ffffff" : "#0059ff",
-                    transform: "translateY(-1px)",
-                  },
-                }}
-              >
-                Docs
-              </Typography>
+              <Link to="/docs" style={{ textDecoration: "none" }}>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    cursor: "pointer",
+                    color: darkMode ? "#bcd8ff" : "#3170f0",
+                    transition: "all 0.3s ease",
+                    fontWeight: 500,
+                    lineHeight: "1.5rem",
+                    "&:hover": {
+                      color: darkMode ? "#ffffff" : "#0059ff",
+                      transform: "translateY(-1px)",
+                    },
+                  }}
+                >
+                  Docs
+                </Typography>
+              </Link>
 
               <Tooltip title="Toggle Dark Mode" arrow>
                 <Box
@@ -335,38 +342,42 @@ export default function App({ toggleTheme, darkMode }) {
             </IconButton>
           </Box>
           <List sx={{ p: 2 }}>
-            <ListItem
-              button
-              onClick={() => setMenuOpen(false)}
-              sx={{
-                color: darkMode ? "#bcd8ff" : "#3170f0",
-                mb: 1,
-                borderRadius: "8px",
-                "&:hover": {
-                  background: darkMode
-                    ? "rgba(79,142,247,0.2)"
-                    : "rgba(140,190,255,0.2)",
-                },
-              }}
-            >
-              <ListItemText primary="About" />
-            </ListItem>
-            <ListItem
-              button
-              onClick={() => setMenuOpen(false)}
-              sx={{
-                color: darkMode ? "#bcd8ff" : "#3170f0",
-                mb: 1,
-                borderRadius: "8px",
-                "&:hover": {
-                  background: darkMode
-                    ? "rgba(79,142,247,0.2)"
-                    : "rgba(140,190,255,0.2)",
-                },
-              }}
-            >
-              <ListItemText primary="Docs" />
-            </ListItem>
+            <Link to="/about" style={{ textDecoration: "none", color: "inherit" }}>
+              <ListItem
+                button
+                onClick={() => setMenuOpen(false)}
+                sx={{
+                  color: darkMode ? "#bcd8ff" : "#3170f0",
+                  mb: 1,
+                  borderRadius: "8px",
+                  "&:hover": {
+                    background: darkMode
+                      ? "rgba(79,142,247,0.2)"
+                      : "rgba(140,190,255,0.2)",
+                  },
+                }}
+              >
+                <ListItemText primary="About" />
+              </ListItem>
+            </Link>
+            <Link to="/docs" style={{ textDecoration: "none", color: "inherit" }}>
+              <ListItem
+                button
+                onClick={() => setMenuOpen(false)}
+                sx={{
+                  color: darkMode ? "#bcd8ff" : "#3170f0",
+                  mb: 1,
+                  borderRadius: "8px",
+                  "&:hover": {
+                    background: darkMode
+                      ? "rgba(79,142,247,0.2)"
+                      : "rgba(140,190,255,0.2)",
+                  },
+                }}
+              >
+                <ListItemText primary="Docs" />
+              </ListItem>
+            </Link>
             <ListItem
               button
               onClick={() => {

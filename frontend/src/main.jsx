@@ -1,9 +1,12 @@
 import React, { useState, useMemo } from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.jsx";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import "@fontsource/poppins/400.css";
 import "@fontsource/poppins/600.css";
+import App from "./App.jsx";
+import About from "./pages/About";
+import Docs from "./pages/Docs";
 
 function Root() {
   const [darkMode, setDarkMode] = useState(true);
@@ -31,10 +34,16 @@ function Root() {
   );
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <App toggleTheme={toggleTheme} darkMode={darkMode} />
-    </ThemeProvider>
+    <Router>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Routes>
+          <Route path="/" element={<App toggleTheme={toggleTheme} darkMode={darkMode} />} />
+          <Route path="/about" element={<About darkMode={darkMode} />} />
+          <Route path="/docs" element={<Docs darkMode={darkMode} />} />
+        </Routes>
+      </ThemeProvider>
+    </Router>
   );
 }
 
