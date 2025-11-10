@@ -11,20 +11,18 @@ from app.utils.log_manager import log_interaction
 from app.evaluation.evaluator import evaluate_retrieval, evaluate_answer_faithfulness
 import numpy as np
 
-
-
-
 logger = get_logger("backend.main")
 app = FastAPI(title="Medical RAG Chatbot Backend")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Or restrict to your frontend domain
+    allow_origins=["*"],  # For local frontend testing
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Load models and retriever
 embedding_model = load_embedding_model()
 retriever = QdrantRetriever(model=embedding_model, top_k=3)
 
@@ -34,6 +32,7 @@ class ChatRequest(BaseModel):
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
 @app.post("/chat")
 async def chat(request: ChatRequest):
     query = request.query
@@ -43,7 +42,6 @@ async def chat(request: ChatRequest):
     try:
         results = retriever.search(query)
         context = "\n\n".join(r["text"] for r in results[:3])
-
         answer = generate_answer_groq(context, query)
         source = "groq"
 
@@ -66,7 +64,6 @@ async def chat(request: ChatRequest):
     except Exception as e:
         logger.exception("Error in /chat")
         return {"error": str(e)}
-    
 
 @app.post("/evaluate")
 async def evaluate(request: ChatRequest):
@@ -76,7 +73,6 @@ async def evaluate(request: ChatRequest):
     q_emb = embedding_model.encode([query], normalize_embeddings=True)
     doc_embs = np.array([embedding_model.encode([r["text"]], normalize_embeddings=True)[0] for r in results])
     retrieval_score = evaluate_retrieval(q_emb, doc_embs)
-
     answer = generate_answer_groq(context, query)
     faith_score = evaluate_answer_faithfulness(answer, context)
 

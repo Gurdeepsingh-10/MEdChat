@@ -61,7 +61,8 @@ export default function App({ toggleTheme, darkMode }) {
     setQuery("");
     setLoading(true);
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/chat`, { query });
+      const res = await axios.post("http://127.0.0.1:8000/chat", { query });
+
       const d = res.data;
       const botMsg = {
         role: "assistant",
