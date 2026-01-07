@@ -1,13 +1,27 @@
 # backend/app/ingestion/splitters.py
 from typing import List, Dict, Any
 
-def simple_chunk(docs: List[Dict[str, Any]], chunk_size: int = 1000) -> List[Dict[str, Any]]:
-    """Naive chunking: split text every `chunk_size` characters."""
+def simple_chunk(docs, chunk_size=1000, overlap=200):
+    """
+    Splits documents into overlapping text chunks.
+    """
     chunks = []
+
     for doc in docs:
         text = doc["text"]
-        for i in range(0, len(text), chunk_size):
-            chunk_text = text[i:i + chunk_size]
-            new_doc = {**doc, "text": chunk_text}
-            chunks.append(new_doc)
+        source = doc.get("source", "")
+
+        start = 0
+        while start < len(text):
+            end = start + chunk_size
+            chunk_text = text[start:end].strip()
+
+            if chunk_text:
+                chunks.append({
+                    "text": chunk_text,
+                    "source": source
+                })
+
+            start += chunk_size - overlap  # ✅ overlap logic
+
     return chunks
