@@ -1,20 +1,42 @@
-"""
-backend/app/indexing/embed.py
-Encodes text chunks into embeddings using sentence-transformers.
-"""
+# backend/app/indexing/embed.py
 
 from sentence_transformers import SentenceTransformer
+import torch
 import numpy as np
-from tqdm import tqdm
+from typing import List, Dict
 
-def load_embedding_model(model_name: str = "BAAI/bge-small-en-v1.5"):
-    print(f"🔹 Loading embedding model: {model_name}")
-    model = SentenceTransformer(model_name)
+
+
+MODEL_NAME = "BAAI/bge-small-en-v1.5"
+
+def load_embedding_model():
+    assert torch.cuda.is_available(), "❌ CUDA NOT AVAILABLE — PyTorch GPU install broken"
+
+    device = "cuda"
+    print(f"🚀 Loading embedding model on: {device}")
+
+    model = SentenceTransformer(MODEL_NAME)
+    model = model.to(device)
+
     return model
 
-def compute_embeddings(model, chunks):
-    """Return numpy array of embeddings + metadata list."""
+def compute_embeddings(
+    model: SentenceTransformer,
+    chunks: List[Dict],
+    batch_size: int = 64
+) -> np.ndarray:
+    """
+    Computes embeddings for text chunks.
+    Uses GPU automatically if model is on CUDA.
+    """
+
     texts = [c["text"] for c in chunks]
-    print(f"🔹 Encoding {len(texts)} chunks...")
-    embeddings = model.encode(texts, show_progress_bar=True, convert_to_numpy=True, normalize_embeddings=True)
-    return np.array(embeddings)
+
+    embeddings = model.encode(
+        texts,
+        batch_size=batch_size,
+        show_progress_bar=True,
+        normalize_embeddings=True
+    )
+
+    return embeddings.astype("float32")
