@@ -42,6 +42,8 @@ class FaissRetriever:
         for idx, score in zip(indices[0], scores[0]):
             if idx == -1:
                 continue
+            if score < 0.25:   # 🔑 similarity cutoff
+                continue
 
             doc = self.docs[idx]
             results.append({

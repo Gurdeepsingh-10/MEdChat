@@ -1,10 +1,7 @@
 # backend/app/ingestion/splitters.py
 from typing import List, Dict, Any
 
-def simple_chunk(docs, chunk_size=1000, overlap=200):
-    """
-    Splits documents into overlapping text chunks.
-    """
+def simple_chunk(docs, chunk_size=800, overlap=150):
     chunks = []
 
     for doc in docs:
@@ -22,6 +19,6 @@ def simple_chunk(docs, chunk_size=1000, overlap=200):
                     "source": source
                 })
 
-            start += chunk_size - overlap  # ✅ overlap logic
+            start = end - overlap  # 🔑 overlap
 
     return chunks
