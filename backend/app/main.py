@@ -10,6 +10,12 @@ from time import perf_counter
 from app.utils.log_manager import log_interaction
 from app.evaluation.evaluator import evaluate_retrieval, evaluate_answer_faithfulness
 import numpy as np
+from app.memory.memory import ConversationMemory
+from app.llm.query_rewriter import rewrite_query
+
+
+memory = ConversationMemory(max_turns=4)
+
 
 logger = get_logger("backend.main")
 app = FastAPI(title="Medical RAG Chatbot Backend")
@@ -39,35 +45,27 @@ async def health():
 
 @app.post("/chat")
 async def chat(request: ChatRequest):
-    query = request.query
-    logger.info(f"User query: {query}")
-    start = perf_counter()
+    user_query = request.query
+    memory.add_user(user_query)
 
-    try:
-        results = retriever.search(query)
-        context = "\n\n".join(r["text"] for r in results[:3])
-        answer = generate_answer_groq(context, query)
-        source = "groq"
+    # 1️⃣ Rewrite query using memory
+    memory_context = memory.get_context()
+    rewritten_query = rewrite_query(memory_context, user_query)
 
-        latency = (perf_counter() - start) * 1000
-        log_interaction(
-            query=query,
-            context_snippets=results,
-            answer=answer,
-            model_name="llama-3.1-8b-instant",
-            source=source,
-            latency_ms=latency,
-        )
-        return {
-            "answer": answer,
-            "citations": [r["source_url"] for r in results[:3]],
-            "latency_ms": round(latency, 2),
-            "source": source,
-        }
+    # 2️⃣ Retrieve using rewritten query
+    results = retriever.search(rewritten_query)
+    context = "\n\n".join(r["text"] for r in results[:3])
 
-    except Exception as e:
-        logger.exception("Error in /chat")
-        return {"error": str(e)}
+    # 3️⃣ Generate answer
+    answer = generate_answer_groq(context, rewritten_query)
+
+    memory.add_assistant(answer)
+
+    return {
+        "answer": answer,
+        "citations": [r["source_url"] for r in results[:3]],
+        "rewritten_query": rewritten_query,
+    }
 
 @app.post("/evaluate")
 async def evaluate(request: ChatRequest):

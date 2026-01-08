@@ -41,8 +41,7 @@ ANSWER FORMAT:
 - Treatment
 - Prevention (if applicable)
 
-End every response with:
-"This information is for educational purposes and not a medical diagnosis."
+"
 """
 
     USER_PROMPT = f"""
