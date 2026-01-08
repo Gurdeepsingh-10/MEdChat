@@ -12,6 +12,8 @@ from app.evaluation.evaluator import evaluate_retrieval, evaluate_answer_faithfu
 import numpy as np
 from app.memory.memory import ConversationMemory
 from app.llm.query_rewriter import rewrite_query
+import torch
+torch.set_num_threads(1)
 
 
 memory = ConversationMemory(max_turns=4)
